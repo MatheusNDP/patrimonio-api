@@ -28,39 +28,33 @@
         {{ $emprestimo->estabelecimentoAtendente->cnpj ?? 'Não informado' }}
     </p>
 
-    <p>
-        <strong>Data do Empréstimo:</strong>
-        {{ optional($emprestimo->data_emprestimo)->format('d/m/Y') }}
-    </p>
-
-    <p>
-        <strong>Data de Devolução:</strong>
-        {{ optional($emprestimo->data_devolucao)->format('d/m/Y') }}
-    </p>
-
     <h2>Patrimônios Emprestados</h2>
 
     <table>
         <thead>
             <tr>
-                <th>ID</th>
-                <th>Nome</th>
+                <th>Patrimônio</th>
                 <th>Código</th>
                 <th>Tipo</th>
+                <th>Data de Empréstimo</th>
+                <th>Data de Devolução</th>
                 <th>Estabelecimento Pai</th>
-                <th>Baixado</th>
             </tr>
         </thead>
 
         <tbody>
             @forelse($emprestimo->patrimonios as $patrimonio)
                 <tr>
-                    <td>{{ $patrimonio->id }}</td>
                     <td>{{ $patrimonio->nome }}</td>
                     <td>{{ $patrimonio->codigo }}</td>
                     <td>{{ $patrimonio->tipo }}</td>
+                    <td>
+                        {{ \Carbon\Carbon::parse($patrimonio->pivot->data_emprestimo)->format('d/m/Y') }}
+                    </td>
+                    <td>
+                        {{ \Carbon\Carbon::parse($patrimonio->pivot->data_devolucao)->format('d/m/Y') }}
+                    </td>
                     <td>{{ $patrimonio->estabelecimentoPai->nome ?? 'Não informado' }}</td>
-                    <td>{{ $patrimonio->baixado ? 'Sim' : 'Não' }}</td>
                 </tr>
             @empty
                 <tr>

@@ -19,9 +19,6 @@ return new class extends Migration
                 ->constrained('estabelecimentos')
                 ->cascadeOnDelete();
 
-            $table->date('data_emprestimo');
-            $table->date('data_devolucao');
-
             $table->timestamps();
         });
     }

@@ -13,9 +13,7 @@
                 <th>ID</th>
                 <th>Requerente</th>
                 <th>Atendente</th>
-                <th>Data Empréstimo</th>
-                <th>Data Devolução</th>
-                <th>Patrimônios</th>
+                <th>Quantidade de Patrimônios</th>
                 <th>Ações</th>
             </tr>
         </thead>
@@ -24,34 +22,20 @@
             @forelse($emprestimos as $emprestimo)
                 <tr>
                     <td>{{ $emprestimo->id }}</td>
-
-                    <td>
-                        {{ $emprestimo->estabelecimentoRequerente->nome ?? 'Não informado' }}
-                    </td>
-
-                    <td>
-                        {{ $emprestimo->estabelecimentoAtendente->nome ?? 'Não informado' }}
-                    </td>
-
-                    <td>
-                        {{ optional($emprestimo->data_emprestimo)->format('d/m/Y') }}
-                    </td>
-
-                    <td>
-                        {{ optional($emprestimo->data_devolucao)->format('d/m/Y') }}
-                    </td>
-
-                    <td>
-                        {{ $emprestimo->patrimonios->count() }}
-                    </td>
-
+                    <td>{{ $emprestimo->estabelecimentoRequerente->nome ?? 'Não informado' }}</td>
+                    <td>{{ $emprestimo->estabelecimentoAtendente->nome ?? 'Não informado' }}</td>
+                    <td>{{ $emprestimo->patrimonios->count() }}</td>
                     <td>
                         <div class="actions">
                             <a href="/emprestimos/{{ $emprestimo->id }}" class="btn btn-secondary">
                                 Ver
                             </a>
 
-                            <form action="/emprestimos/{{ $emprestimo->id }}" method="POST" onsubmit="return confirm('Deseja realmente excluir este empréstimo?')">
+                            <form
+                                action="/emprestimos/{{ $emprestimo->id }}"
+                                method="POST"
+                                onsubmit="return confirm('Deseja realmente excluir este empréstimo?')"
+                            >
                                 @csrf
                                 @method('DELETE')
 
@@ -64,7 +48,7 @@
                 </tr>
             @empty
                 <tr>
-                    <td colspan="7">Nenhum empréstimo cadastrado.</td>
+                    <td colspan="5">Nenhum empréstimo cadastrado.</td>
                 </tr>
             @endforelse
         </tbody>

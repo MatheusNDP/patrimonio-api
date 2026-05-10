@@ -28,45 +28,59 @@
             @endforeach
         </select>
 
-        <label for="data_emprestimo">Data do Empréstimo</label>
-        <input
-            type="date"
-            name="data_emprestimo"
-            id="data_emprestimo"
-            value="{{ old('data_emprestimo') }}"
-            required
-        >
+        <label class="section-label">Patrimônios do Estabelecimento Atendente</label>
 
-        <label for="data_devolucao">Data de Devolução</label>
-        <input
-            type="date"
-            name="data_devolucao"
-            id="data_devolucao"
-            value="{{ old('data_devolucao') }}"
-            required
-        >
+        <div class="patrimonios-grid">
+            @foreach($patrimonios as $patrimonio)
+                <div
+                    class="patrimonio-card"
+                    data-estabelecimento="{{ $patrimonio->estabelecimento_pai_id }}"
+                    style="display: none;"
+                >
+                    <label class="patrimonio-option">
+                        <input
+                            type="checkbox"
+                            class="patrimonio-checkbox"
+                            name="patrimonios[{{ $loop->index }}][patrimonio_id]"
+                            value="{{ $patrimonio->id }}"
+                        >
 
-        <label>Patrimônios</label>
+                        <div class="patrimonio-card-content">
+                            <div class="patrimonio-card-top">
+                                <strong>{{ $patrimonio->nome }}</strong>
+                                <span class="badge">{{ $patrimonio->tipo }}</span>
+                            </div>
 
-        <div class="checkbox-list">
-            @forelse($patrimonios as $patrimonio)
-                <label class="checkbox-item">
-                    <input
-                        type="checkbox"
-                        name="patrimonios[]"
-                        value="{{ $patrimonio->id }}"
-                        {{ in_array($patrimonio->id, old('patrimonios', [])) ? 'checked' : '' }}
-                    >
+                            <div class="patrimonio-card-info">
+                                <p><strong>Código:</strong> {{ $patrimonio->codigo }}</p>
+                                <p><strong>Estabelecimento Pai:</strong> {{ $patrimonio->estabelecimentoPai->nome ?? 'Não informado' }}</p>
+                            </div>
 
-                    {{ $patrimonio->nome }}
-                    -
-                    Código: {{ $patrimonio->codigo }}
-                    -
-                    Pai: {{ $patrimonio->estabelecimentoPai->nome ?? 'Não informado' }}
-                </label>
-            @empty
-                <p>Nenhum patrimônio disponível para empréstimo.</p>
-            @endforelse
+                            <div class="datas-patrimonio" style="display: none;">
+                                <label>Data de Empréstimo</label>
+                                <input
+                                    type="date"
+                                    class="data-input"
+                                    name="patrimonios[{{ $loop->index }}][data_emprestimo]"
+                                    disabled
+                                >
+
+                                <label>Data de Devolução</label>
+                                <input
+                                    type="date"
+                                    class="data-input"
+                                    name="patrimonios[{{ $loop->index }}][data_devolucao]"
+                                    disabled
+                                >
+                            </div>
+                        </div>
+                    </label>
+                </div>
+            @endforeach
+        </div>
+
+        <div id="mensagem-sem-patrimonio" class="empty-box">
+            Selecione um estabelecimento atendente para listar os patrimônios disponíveis.
         </div>
 
         <div class="form-actions">
@@ -74,4 +88,76 @@
             <a href="/emprestimos" class="btn btn-secondary">Voltar</a>
         </div>
     </form>
+
+    <script>
+        const selectAtendente = document.getElementById('estabelecimento_atendente_id');
+        const cards = document.querySelectorAll('.patrimonio-card');
+        const mensagem = document.getElementById('mensagem-sem-patrimonio');
+
+        function atualizarPatrimonios() {
+            const estabelecimentoSelecionado = selectAtendente.value;
+            let encontrou = false;
+
+            cards.forEach(card => {
+                const pertenceAoEstabelecimento = card.dataset.estabelecimento === estabelecimentoSelecionado;
+
+                const checkbox = card.querySelector('.patrimonio-checkbox');
+                const datas = card.querySelector('.datas-patrimonio');
+                const inputsData = card.querySelectorAll('.data-input');
+
+                if (pertenceAoEstabelecimento) {
+                    card.style.display = 'block';
+                    encontrou = true;
+                } else {
+                    card.style.display = 'none';
+                    checkbox.checked = false;
+                    datas.style.display = 'none';
+
+                    inputsData.forEach(input => {
+                        input.disabled = true;
+                        input.required = false;
+                        input.value = '';
+                    });
+                }
+            });
+
+            if (!estabelecimentoSelecionado) {
+                mensagem.innerText = 'Selecione um estabelecimento atendente para listar os patrimônios disponíveis.';
+                mensagem.style.display = 'block';
+                return;
+            }
+
+            mensagem.innerText = 'Nenhum patrimônio disponível para este estabelecimento.';
+            mensagem.style.display = encontrou ? 'none' : 'block';
+        }
+
+        cards.forEach(card => {
+            const checkbox = card.querySelector('.patrimonio-checkbox');
+            const datas = card.querySelector('.datas-patrimonio');
+            const inputsData = card.querySelectorAll('.data-input');
+
+            checkbox.addEventListener('change', function () {
+                if (this.checked) {
+                    datas.style.display = 'block';
+
+                    inputsData.forEach(input => {
+                        input.disabled = false;
+                        input.required = true;
+                    });
+                } else {
+                    datas.style.display = 'none';
+
+                    inputsData.forEach(input => {
+                        input.disabled = true;
+                        input.required = false;
+                        input.value = '';
+                    });
+                }
+            });
+        });
+
+        selectAtendente.addEventListener('change', atualizarPatrimonios);
+
+        atualizarPatrimonios();
+    </script>
 @endsection
